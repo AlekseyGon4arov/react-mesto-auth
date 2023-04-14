@@ -1,0 +1,17 @@
+.popup__confirm-title {
+  width: 330px;
+  font-weight: 900;
+  font-size: 24px;
+  line-height: 29px;
+  color: #000;
+  margin: 34px 64px 10px 36px;
+}
+
+@media screen and (max-width: 625px) {
+  .popup__confirm-title {
+    width: 238px;
+    font-size: 18px;
+    line-height: 22px;
+    margin: 25px 22px 10px;
+  }
+}
