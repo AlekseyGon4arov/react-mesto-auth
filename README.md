@@ -16,4 +16,4 @@
 
 **Ссылка на GH-Pages**
 
-[Ссылка на GH-Pages](https://alekseygon4arov.github.io/mesto-react-auth/)
+[Ссылка на GH-Pages](https://alekseygon4arov.github.io/react-mesto-auth/)
