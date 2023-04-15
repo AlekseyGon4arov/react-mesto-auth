@@ -1,4 +1,4 @@
-function PopupWithForm({name, title, isOpened, onClose, children, onSubmit = () => {}}) {
+function PopupWithForm({ name, title, isOpened, onClose, children, onSubmit = () => {} }) {
   
   return (
     <div className={`popup popup_type_${name} ${isOpened ? 'popup_opened' : ''}`}>

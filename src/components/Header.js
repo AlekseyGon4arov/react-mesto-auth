@@ -1,17 +1,9 @@
 import React from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import headerLogo from '../image/Vector.svg';
 
-function Header({ setLoggedIn, userData }) {
+function Header({ onSignOut, userData }) {
 
-  const navigate = useNavigate();
-
-  function onSignOut() {
-    localStorage.removeItem('jwt');
-    navigate('./sign-up', { replace: true });
-    setLoggedIn(false);
-  };
-  
   return (
     <header className="header">
       <img className="header__logo" src={headerLogo} alt="Логотип" />
@@ -25,7 +17,7 @@ function Header({ setLoggedIn, userData }) {
             element={<Link to="/sign-up" className="header__link">Регистрация</Link>}>
           </Route>
           <Route path="/" 
-            element={<Link onClick={onSignOut} to="/sign-up" className="header__link">Выйти</Link>}>
+            element={<Link onClick={onSignOut} to="/sign-in" className="header__link">Выйти</Link>}>
           </Route>
         </Routes>
       </div>

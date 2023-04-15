@@ -1,5 +1,6 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import { CurrentUserContext } from '../contexts/CurrentUserContext';
 import Header from './Header';
 import Main from './Main';
 import ImagePopup from './ImagePopup';
@@ -8,56 +9,42 @@ import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import InfoTooltip from './InfoTooltip';
 import ProtectedRoute from './ProtectedRoute';
-
+import Login from './Login';
+import Register from './Register';
 import api from '../utils/api';
 import auth from '../utils/auth';
 
-import { CurrentUserContext } from '../contexts/CurrentUserContext';
-import Login from './Login';
-import Register from './Register';
-
 function App() {
 
-  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
-  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
-  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
-  const [selectedCard, setSelectedCard] = React.useState(null);
-  const [currentUser, setCurrentUser] = React.useState({});
-  const [cards, setCards] = React.useState([]);
-  const [loggedIn, setLoggedIn] = React.useState(false);
-  
-  const [infoTooltip, setInfoTooltip] = React.useState(false);
-  const [error, setError] = React.useState(false);
-
-
-
-  const [userData, setUserData] = React.useState('');
-
-  function hendleLogin() {
-    setLoggedIn(true);
-  }
+  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
+  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [currentUser, setCurrentUser] = useState({});
+  const [cards, setCards] = useState([]);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [infoTooltip, setInfoTooltip] = useState(false);
+  const [error, setError] = useState(false);
+  const [userData, setUserData] = useState('');
+  const [formValue, setFormValue] = useState({
+    email: '',
+    password: ''
+  });
 
   const navigate = useNavigate();
   
-  React.useEffect(() => {
-    api.getProfileData()
-    .then((res) => {
-      setCurrentUser(res);
+  useEffect(() => {
+    loggedIn && Promise.all([api.getProfileData(), api.getInitialCards()])
+    .then(([user, cards]) => {
+      setCurrentUser(user);
+      setCards(cards);
     })
     .catch((err) => {
       console.log(err);
     });
+  },[loggedIn]);
 
-    api.getInitialCards() 
-    .then((res) => {
-      setCards(res);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  },[]);
-
-  React.useEffect(() => {
+  useEffect(() => {
     const jwt = localStorage.getItem('jwt');
     if (jwt) {
       auth.checkToken(jwt)
@@ -128,6 +115,54 @@ function App() {
     });
   }
 
+  function handleChange(e) {
+    const {name, value} = e.target;
+
+    setFormValue({
+      ...formValue,
+      [name]: value
+    });
+  }
+
+  function handleLogin(e) {
+    e.preventDefault();
+
+    auth.authorize(formValue)
+      .then((res) => {
+        if (res.token) {
+          localStorage.setItem('jwt', res.token);
+          setFormValue(formValue.email);
+          navigate('/', {replace: false});
+        }
+      }).catch((err) => {
+        setInfoTooltip(true);
+        setError(true);
+        console.log(err);
+      })
+  }
+
+  function handleRegister(e) {
+    e.preventDefault();
+
+    auth.register(formValue)
+      .then(() => {
+        navigate('/sign-in', {replace: true});
+        setInfoTooltip(true);
+        setError(false);
+      }).catch((err) => { 
+        setInfoTooltip(true);
+        setError(true);
+        console.log(err);
+      })
+  }
+
+  function onSignOut() {
+    localStorage.removeItem('jwt');
+    navigate('./sign-up', { replace: true });
+    setLoggedIn(false);
+    setUserData('');
+  };
+
   function handleEditProfileClick() {
     setIsEditProfilePopupOpen(true);
   }
@@ -152,12 +187,14 @@ function App() {
     setSelectedCard(card);
   }
 
-
   return (
     <div className="root">
       <CurrentUserContext.Provider value={currentUser}>
 
-        <Header userData={userData} />
+        <Header 
+          userData={userData} 
+          onSignOut={onSignOut}
+        />
         
         <Routes>
  
@@ -176,10 +213,12 @@ function App() {
               />
             }
           /> 
+          
           <Route path="/sign-in" 
             element={
               <Login 
-                onLogin={hendleLogin}
+                onLogin={handleLogin}
+                handleChange={handleChange}
                 setInfoTooltip={setInfoTooltip} 
                 setError={setError} 
               />
@@ -189,6 +228,8 @@ function App() {
           <Route path="/sign-up" 
             element={
               <Register 
+                onRegister={handleRegister}
+                handleChange={handleChange}
                 setInfoTooltip={setInfoTooltip} 
                 setError={setError} 
               />
@@ -197,7 +238,8 @@ function App() {
 
           <Route path="*" 
             element={
-              loggedIn ? <Navigate to="/" replace /> : <Navigate to="/sign-up" replace />} />            
+              loggedIn ? <Navigate to="/" replace /> : <Navigate to="/sign-up" replace />} 
+          />            
 
         </Routes> 
 

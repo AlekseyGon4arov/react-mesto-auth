@@ -1,7 +1,7 @@
 import successIcon from '../image/Success-Icon.svg';
 import failIcon from '../image/Fail-icon.svg';
 
-function InfoTooltip({isOpened, onClose, error }) {
+function InfoTooltip({ isOpened, onClose, error }) {
 
   return (
     <div className={`popup ${isOpened ? 'popup_opened' : ''}`}>

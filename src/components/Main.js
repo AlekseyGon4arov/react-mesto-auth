@@ -1,12 +1,11 @@
-import React from 'react';
+import { useContext } from 'react';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 import Card from './Card';
 import Footer from './Footer';
 
+function Main({ onEditAvatar, onEditProfile, onAddPlace, onCardClick, onClickLike, onCardDelete, cards }) {
 
-function Main({onEditAvatar, onEditProfile, onAddPlace, onCardClick, onClickLike, onCardDelete, cards}) {
-
-  const currentUser = React.useContext(CurrentUserContext);
+  const currentUser = useContext(CurrentUserContext);
 
   return (
     <>
